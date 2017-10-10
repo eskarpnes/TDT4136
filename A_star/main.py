@@ -1,5 +1,5 @@
 from PIL import Image, ImageDraw
-from tk import BoardRender
+from renderboard import BoardRender
 
 
 class Board:
