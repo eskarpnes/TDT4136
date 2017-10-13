@@ -47,15 +47,15 @@ class Board:
         img.show()
 
 
-inf = float("inf")
-
-
 def heuristic(goal, curr):
     #Manhattan distance to goal
     return abs(curr[0] - goal[0]) + abs(curr[1] - goal[1])
 
 
-def a_star_red_blob(graph, start, goal):
+def a_star_red_blob(board_name):
+    board = Board(board_name)
+    start = board.start
+    goal = board.goal
     frontier = PriorityQueue()
     frontier.put(start, 0)
     came_from = {}
@@ -65,12 +65,13 @@ def a_star_red_blob(graph, start, goal):
 
     while not frontier.empty():
         current = frontier.get()
+        print(current)
 
         if current == goal:
             break
 
-        for next in graph.neighbors(current):
-            new_cost = cost_so_far[current] + graph.cost(current, next)
+        for next in board.get_neighbors(current):
+            new_cost = cost_so_far[current] + board.cost(current, next)
             if next not in cost_so_far or new_cost < cost_so_far[next]:
                 cost_so_far[next] = new_cost
                 priority = new_cost + heuristic(goal, next)
