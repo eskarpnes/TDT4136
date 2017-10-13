@@ -2,13 +2,14 @@ from queue import PriorityQueue, Queue
 from PIL import Image, ImageDraw
 from renderboard import BoardRender
 import time
+import os
 
 #  The  class containing information about the board
 class Board:
     def __init__(self, board_name):
         self.start = None
         self.goal = None  # me-irl
-        self.board = "boards/board-" + board_name + ".txt"
+        self.board = board_name
         self.board_array = []
         self.read_board()
         self.board_w = len(self.board_array[0])
@@ -200,22 +201,28 @@ def find_path(start, goal, came_from, considered, board):
         x, y = c
         renderBoard.considered(y, x)
         renderBoard.redraw()
-        time.sleep(0.01)
+        time.sleep(0.005)
     # Renders the path
     for p in path:
         x, y = p
         renderBoard.visited(y, x)
         renderBoard.redraw()
-        time.sleep(0.05)
-    #  renderBoard.mainloop()
+        time.sleep(0.02)
     time.sleep(1)
 
 
 if __name__ == "__main__":
-    boards = "1-1 1-2 1-3 1-4 2-1 2-2 2-3 2-4".split()
-    for b in boards:
-        print(b)
-        #  board = Board("1-1")
-        a_star(b)
-        #dijkstra(b)
-        #bfs(b)
+    #  boards = "1-1 1-2 1-3 1-4 2-1 2-2 2-3 2-4".split()
+    def iterate_path(path, algorithm):
+        for board in os.listdir(path):
+            board_path = os.path.join(path, board)
+            print(board_path)
+            if os.path.isfile(board_path):
+                print(board_path)
+                algorithm(board_path)
+
+    iterate_path('custom', a_star)
+    #  iterate_path('boards', dijkstra)
+    #  iterate_path('boards', a_star)
+    #  iterate_path('boards', bfs)
+    time.sleep(1000) # a desired delay after writing all boards

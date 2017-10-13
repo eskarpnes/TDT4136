@@ -30,12 +30,11 @@ class BoardRender(tk.Tk):
         board_x = len(board_array[0])
         board_y = len(board_array)
         tk.Tk.__init__(self)
-        self.cellwidth = 40
-        self.cellheight = 40
+        self.cell_size = 15
         self.canvas = tk.Canvas(
             self,
-            width=self.cellwidth * board_x,  # board width * square size
-            height=self.cellheight * board_y,  # board width * square size
+            width=self.cell_size * board_x,  # board width * square size
+            height=self.cell_size * board_y,  # board width * square size
             borderwidth=0,
             highlightthickness=0,
             relief='flat')
@@ -45,14 +44,14 @@ class BoardRender(tk.Tk):
         self.oval = {}
         for column in range(board_x):
             for row in range(board_y):
-                x1 = column * self.cellwidth
-                y1 = row * self.cellheight
-                x2 = x1 + self.cellwidth
-                y2 = y1 + self.cellheight
+                x1 = column * self.cell_size
+                y1 = row * self.cell_size
+                x2 = x1 + self.cell_size
+                y2 = y1 + self.cell_size
                 self.rect[row, column] = self.canvas.create_rectangle(
                     x1, y1, x2, y2, tags="rect")
                 self.oval[row, column] = self.canvas.create_oval(
-                    x1 + 8, y1 + 8, x2 - 8, y2 - 8, tags="oval")
+                    x1 + 4, y1 + 4, x2 - 4, y2 - 4, tags="oval")
 
         self.canvas.itemconfig("rect", fill="")
         self.canvas.itemconfig("oval", fill="", outline="")
