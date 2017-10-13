@@ -1,4 +1,4 @@
-from queue import PriorityQueue
+from queue import PriorityQueue, Queue
 from PIL import Image, ImageDraw
 from renderboard import BoardRender
 import time
@@ -86,7 +86,8 @@ def heuristic(goal, curr):
     return x_diff + y_diff
 
 
-def a_star_red_blob(board_name):
+#  This astar algorithm is based on the algorithm in the website www.redblobgames.com
+def a_star(board_name):
     board = Board(board_name)
     start = board.start
     goal = board.goal
@@ -112,6 +113,63 @@ def a_star_red_blob(board_name):
                 priority = new_cost + heuristic(goal, friend)
                 frontier.put((priority, friend))
                 came_from[friend] = current
+    find_path(start, goal, came_from, considered, board)
+
+
+def dijkstra(board_name):
+    board = Board(board_name)
+    start = board.start
+    goal = board.goal
+    frontier = PriorityQueue()
+    frontier.put((0, start))
+    came_from = {}
+    cost_so_far = {}
+    came_from[start] = None
+    cost_so_far[start] = 0
+    considered = []
+
+    while not frontier.empty():
+        current = frontier.get()[1]
+        if current == goal:
+            break
+
+        neighbors = board.get_neighbors(current)
+        for friend in neighbors:
+            new_cost = cost_so_far[current] + board.cost(friend)
+            if friend not in cost_so_far or new_cost < cost_so_far[friend]:
+                considered.append(friend)
+                cost_so_far[friend] = new_cost
+                priority = new_cost
+                frontier.put((priority, friend))
+                came_from[friend] = current
+    find_path(start, goal, came_from, considered, board)
+
+
+def bfs(board_name):
+    board = Board(board_name)
+    start = board.start
+    goal = board.goal
+    frontier = Queue()
+    frontier.put(start)
+    came_from = {}
+    came_from[start] = None
+    considered = []
+
+    while not frontier.empty():
+        current = frontier.get()
+        if current == goal:
+            break
+
+        neighbors = board.get_neighbors(current)
+        for friend in neighbors:
+            if friend not in came_from:
+                considered.append(friend)
+                frontier.put(friend)
+                came_from[friend] = current
+    find_path(start, goal, came_from, considered, board)
+
+
+def find_path(start, goal, came_from, considered, board):
     current = goal
     path = [current]
     while current != start:
@@ -124,6 +182,7 @@ def a_star_red_blob(board_name):
         x, y = c
         renderBoard.considered(y, x)
         renderBoard.redraw()
+        time.sleep(0.01)
     for p in path:
         x, y = p
         renderBoard.visited(y, x)
@@ -138,4 +197,6 @@ if __name__ == "__main__":
     for b in boards:
         print(b)
         #  board = Board("1-1")
-        a_star_red_blob(b)
+        #  a_star(b)
+        #  dijkstra(b)
+        bfs(b)
