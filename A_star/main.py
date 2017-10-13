@@ -216,12 +216,10 @@ if __name__ == "__main__":
     def iterate_path(path, algorithm):
         for board in os.listdir(path):
             board_path = os.path.join(path, board)
-            print(board_path)
             if os.path.isfile(board_path):
-                print(board_path)
                 algorithm(board_path)
 
-    iterate_path('custom', a_star)
+    iterate_path('harstad', a_star)
     #  iterate_path('boards', dijkstra)
     #  iterate_path('boards', a_star)
     #  iterate_path('boards', bfs)
