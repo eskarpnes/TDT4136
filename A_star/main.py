@@ -32,16 +32,20 @@ class Board:
 inf = float("inf")
 
 
+def heuristic(a, b):
+    #Manhattan distance to goal
+    return abs(a.x - b.x) + abs(a.y - b.y)
+
 # G - the graph, s - the start node, t - the goal, h - the heuristic formula
-def a_star(G, s, t, h):
-    P, Q = {}, [(h(s), None, s)]  # Preds and queue w/heuristic
+def a_star(Graph, start, end, heuristic):
+    P, Q = {}, [(heuristic(start), None, start)]  # Preds and queue w/heuristic
     while Q:  # Still unprocessed nodes?
         d, p, u = heappop(Q)  # Node with lowest heuristic
         if u in P: continue  # Already visited? Skip it
         P[u] = p  # Set path predecessor
-        if u == t: return d - h(t), P  # Arrived! Ret. dist and preds
-        for v in G[u]:  # Go through all neighbours
-            w = G[u][v] - h(u) + h(v)  # Modify weight wrt heuristic
+        if u == end: return d - heuristic(end), P  # Arrived! Ret. dist and preds
+        for v in Graph[u]:  # Go through all neighbours
+            w = Graph[u][v] - heuristic(u) + heuristic(v)  # Modify weight wrt heuristic
             heappush(Q, (d + w, u, v))  # Add to queue, w/heur as pri
     return inf, None  # Didn't get to t
 
