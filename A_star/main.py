@@ -1,6 +1,5 @@
 from PIL import Image, ImageDraw
 from renderboard import BoardRender
-from heapq import heappush, heappop
 
 
 class Board:
@@ -31,6 +30,8 @@ class Board:
         self.board_array = board
         print("Read board of size " + str(len(self.board_array)) +
               "," + str(len(self.board_array[0])))
+        print("start: " + str(self.start))
+        print("end: " + str(self.goal))
 
     def save_image_board(self):
         img = Image.new(
