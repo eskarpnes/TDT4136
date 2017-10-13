@@ -33,10 +33,19 @@ class Board:
                         valid_nodes.append(node)
         return valid_nodes
 
-    def cost(self, current_node, next_node):
-        #  curr_x, curr_y = current_node
-        #  next_x, next_y = next_node
-        return 1
+    def cost_node(self, x):
+        return {
+            'w': 100,  # Water
+            'm': 50,  # Mountain
+            'f': 10,  # Forest
+            'g': 5,  # Grass
+            'r': 1,  # Road
+        }.get(x, 1)  # Default
+
+    def cost(self, node):
+        x, y = node
+        cost_num = self.cost_node(self.board_array[y][x])
+        return cost_num
 
     def read_board(self):
         f = open(self.board)
@@ -72,36 +81,36 @@ class Board:
 
 def heuristic(goal, curr):
     # Manhattan distance to goal
-    return abs(curr[0] - goal[0]) + abs(curr[1] - goal[1])
+    x_diff = abs(curr[0] - goal[0])
+    y_diff = abs(curr[1] - goal[1])
+    return x_diff + y_diff
 
 
 def a_star_red_blob(board_name):
     board = Board(board_name)
     start = board.start
     goal = board.goal
-    print("Start: " + str(start))
-    print("Goal: " + str(goal))
     frontier = PriorityQueue()
-    frontier.put(start, 0)
+    frontier.put((0, start))
     came_from = {}
     cost_so_far = {}
     came_from[start] = None
     cost_so_far[start] = 0
-
-    path = []
+    considered = []
 
     while not frontier.empty():
-        current = frontier.get()
+        current = frontier.get()[1]
         if current == goal:
             break
 
         neighbors = board.get_neighbors(current)
         for friend in neighbors:
-            new_cost = cost_so_far[current] + board.cost(current, friend)
+            new_cost = cost_so_far[current] + board.cost(friend)
             if friend not in cost_so_far or new_cost < cost_so_far[friend]:
+                considered.append(friend)
                 cost_so_far[friend] = new_cost
                 priority = new_cost + heuristic(goal, friend)
-                frontier.put(friend, priority)
+                frontier.put((priority, friend))
                 came_from[friend] = current
     current = goal
     path = [current]
@@ -111,17 +120,21 @@ def a_star_red_blob(board_name):
     path.reverse()
     print([p for p in path])
     renderBoard = BoardRender(board.board_array)
+    for c in considered:
+        x, y = c
+        renderBoard.considered(y, x)
+        renderBoard.redraw()
     for p in path:
         x, y = p
         renderBoard.visited(y, x)
         renderBoard.redraw()
-        time.sleep(0.3)
+        time.sleep(0.05)
     #  renderBoard.mainloop()
-    time.sleep(2)
+    time.sleep(1)
 
 
 if __name__ == "__main__":
-    boards = "1-1 1-2 1-3 1-4".split()
+    boards = "1-1 1-2 1-3 1-4 2-1 2-2 2-3 2-4".split()
     for b in boards:
         print(b)
         #  board = Board("1-1")

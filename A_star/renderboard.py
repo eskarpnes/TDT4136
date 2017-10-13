@@ -15,7 +15,8 @@ colors = {
     '#': rgb(114, 114, 114),  # Wall
     'A': rgb(90, 180, 90),  # Start
     'B': rgb(255, 90, 90),  # End
-    'v': rgb(255, 0, 0)
+    'v': rgb(255, 0, 0),
+    'c': rgb(150, 150, 150)
 }
 
 
@@ -51,7 +52,8 @@ class BoardRender(tk.Tk):
                 self.rect[row, column] = self.canvas.create_rectangle(
                     x1, y1, x2, y2, tags="rect")
                 self.oval[row, column] = self.canvas.create_oval(
-                    x1 + 6, y1 + 6, x2 - 6, y2 - 6, tags="oval")
+                    x1 + 8, y1 + 8, x2 - 8, y2 - 8, tags="oval")
+
         self.canvas.itemconfig("rect", fill="")
         self.canvas.itemconfig("oval", fill="", outline="")
 
@@ -71,3 +73,7 @@ class BoardRender(tk.Tk):
     def visited(self, x, y):
         pos = self.oval[x, y]
         self.canvas.itemconfig(pos, fill=get_color('v'))
+
+    def considered(self, x, y):
+        pos = self.oval[x, y]
+        self.canvas.itemconfig(pos, fill=get_color('c'))
