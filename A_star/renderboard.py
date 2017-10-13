@@ -1,5 +1,4 @@
 import tkinter as tk
-import random
 
 
 def rgb(r, g, b):
@@ -52,30 +51,22 @@ class BoardRender(tk.Tk):
                 self.rect[row, column] = self.canvas.create_rectangle(
                     x1, y1, x2, y2, tags="rect")
                 self.oval[row, column] = self.canvas.create_oval(
-                    x1 + 8, y1 + 8, x2 - 8, y2 - 8, tags="oval")
+                    x1 + 6, y1 + 6, x2 - 6, y2 - 6, tags="oval")
         self.canvas.itemconfig("rect", fill="")
         self.canvas.itemconfig("oval", fill="", outline="")
 
-        #  self.redraw(2000)
         for i in range(board_y):
             for j in range(board_x):
                 self.fill_square(j, i, color=board_array[i][j])
-        self.mainloop()
 
     def fill_square(self, x, y, color):
         #  self.canvas.itemconfig("rect", fill=get_color(color))
         pos = self.rect[y, x]
         self.canvas.itemconfig(pos, fill=get_color(color))
 
-    def redraw(self, delay):
-        self.canvas.itemconfig("rect", fill="blue")
-        self.canvas.itemconfig("oval", fill="blue")
-        for i in range(10):
-            row = random.randint(0, 19)
-            col = random.randint(0, 19)
-            item_id = self.oval[row, col]
-            self.canvas.itemconfig(item_id, fill="green")
-        self.after(delay, lambda: self.redraw(delay))
+    def redraw(self):
+        self.update_idletasks()
+        self.update()
 
     def visited(self, x, y):
         pos = self.oval[x, y]
