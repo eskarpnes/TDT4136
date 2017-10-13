@@ -29,16 +29,16 @@ class BoardRender(tk.Tk):
         board_x = len(board_array[0])
         board_y = len(board_array)
         tk.Tk.__init__(self)
+        self.cellwidth = 40
+        self.cellheight = 40
         self.canvas = tk.Canvas(
             self,
-            width=20 * board_x,  # board width * square size
-            height=20 * board_y,  # board width * square size
+            width=self.cellwidth * board_x,  # board width * square size
+            height=self.cellheight * board_y,  # board width * square size
             borderwidth=0,
             highlightthickness=0,
             relief='flat')
         self.canvas.pack(side="top", fill="both", expand="true")
-        self.cellwidth = 20
-        self.cellheight = 20
 
         self.rect = {}
         self.oval = {}
