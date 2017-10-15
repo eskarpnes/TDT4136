@@ -4,7 +4,7 @@ from renderboard import BoardRender
 import time
 import os
 
-#  The  class containing information about the board
+
 class Board:
     def __init__(self, board_name):
         self.start = None
@@ -22,26 +22,24 @@ class Board:
 
     # Finds every valid neighbour of a node
     def get_neighbors(self, node):
-        # fetch all surrounding neighbors of node
         x, y = node
         l, t, r, b = (x - 1, y), (x, y - 1), (x + 1, y), (x, y + 1)
         valid_nodes = []
         for node in [l, t, r, b]:
             x, y = node
             if 0 <= x < self.board_w and 0 <= y < self.board_h and not self.is_wall(node):
-            # this is a possible node, check for walls
                 valid_nodes.append(node)
         return valid_nodes
 
     # Contains the costs of the different terrains
     def cost_node(self, x):
         return {
-            'w': 100,  # Water
-            'm': 50,  # Mountain
-            'f': 10,  # Forest
-            'g': 5,  # Grass
-            'r': 1,  # Road
-        }.get(x, 1)  # Default
+            'w': 100,   # Water
+            'm': 50,    # Mountain
+            'f': 10,    # Forest
+            'g': 5,     # Grass
+            'r': 1,     # Road
+        }.get(x, 1)     # Default
 
     # Finds the cost of a node
     def cost(self, node):
@@ -54,11 +52,10 @@ class Board:
         board = []
         for line in f:
             board.append([c for c in line if c != '\n'])
+        # detect start and goal
         for x in range(len(board[0])):
             for y in range(len(board)):
                 c = board[y][x]
-                if c == '\n':
-                    pass
                 if not self.start and c == 'A':
                     self.start = x, y
                 if not self.goal and c == 'B':
@@ -81,6 +78,7 @@ class Board:
                     [x * 20, y * 20, x * 20 + 20, y * 20 + 20], color)
         img.show()
 
+
 # Heuristic used by astar algo
 def heuristic(goal, curr):
     # Manhattan distance to goal
@@ -89,9 +87,8 @@ def heuristic(goal, curr):
     return x_diff + y_diff
 
 
-#  This astar algorithm is based on the algorithm in the website www.redblobgames.com
-def a_star(board_name):
-    # Inits the values needed by the algo
+#  This astar algorithm is based on the algorithm found at redblobgames.com
+def shortest_path(board_name, prioritize=False):
     board = Board(board_name)
     start = board.start
     goal = board.goal
@@ -111,54 +108,33 @@ def a_star(board_name):
         if current == goal:
             break
 
-        # Gets every neighbour of the current node
         neighbors = board.get_neighbors(current)
-        # Neighbours named friend for friendliness
+        #  Neighbours named friend for friendliness
         for friend in neighbors:
-            # Calculates the cost of the neighbour based on the weights
+            #  Calculates the cost of the neighbour based on the weights
             new_cost = cost_so_far[current] + board.cost(friend)
-            # Adds the neighbour to the frontier if it has lower cost than before
+            #  Adds the neighbour to the frontier if it has lower cost than before
             if friend not in cost_so_far or new_cost < cost_so_far[friend]:
                 # Adds the neighbour to the considered nodes (for visualization)
                 considered.append(friend)
-                # Sets the cost
                 cost_so_far[friend] = new_cost
                 # Calculates priority and adds it to queue
-                priority = new_cost + heuristic(goal, friend)
+                priority = new_cost  # dijkstra
+                if prioritize:  # a_star
+                    priority = new_cost + heuristic(goal, friend)
                 frontier.put((priority, friend))
                 # Sets predecessor
                 came_from[friend] = current
     find_path(start, goal, came_from, considered, board)
 
-# The dijkstra algorithm. Same as the astar without the heuristics
-# See comments on astar
+
+def a_star(board_name):
+    shortest_path(board_name, prioritize=True)
+
+
+# Same as the astar without the heuristic
 def dijkstra(board_name):
-    board = Board(board_name)
-    start = board.start
-    goal = board.goal
-    frontier = PriorityQueue()
-    frontier.put((0, start))
-    came_from = {}
-    cost_so_far = {}
-    came_from[start] = None
-    cost_so_far[start] = 0
-    considered = []
-
-    while not frontier.empty():
-        current = frontier.get()[1]
-        if current == goal:
-            break
-
-        neighbors = board.get_neighbors(current)
-        for friend in neighbors:
-            new_cost = cost_so_far[current] + board.cost(friend)
-            if friend not in cost_so_far or new_cost < cost_so_far[friend]:
-                considered.append(friend)
-                cost_so_far[friend] = new_cost
-                priority = new_cost
-                frontier.put((priority, friend))
-                came_from[friend] = current
-    find_path(start, goal, came_from, considered, board)
+    shortest_path(board_name)
 
 
 def bfs(board_name):
@@ -213,14 +189,21 @@ def find_path(start, goal, came_from, considered, board):
 
 if __name__ == "__main__":
     #  boards = "1-1 1-2 1-3 1-4 2-1 2-2 2-3 2-4".split()
-    def iterate_path(path, algorithm):
+    def iterate_path(path, algorithm, board_name=None):
         for board in os.listdir(path):
             board_path = os.path.join(path, board)
             if os.path.isfile(board_path):
-                algorithm(board_path)
+                if board_name:
+                    if board_name in board_path:
+                        algorithm(board_path)
+                        continue
+                if not board_name:
+                    algorithm(board_path)
 
-    iterate_path('harstad', a_star)
-    #  iterate_path('boards', dijkstra)
+    #  iterate_path('harstad', a_star)
+    iterate_path('boards', a_star, '1-1')
+    iterate_path('boards', dijkstra, '1-1')
+    iterate_path('boards', bfs, '1-1')
     #  iterate_path('boards', a_star)
     #  iterate_path('boards', bfs)
-    time.sleep(1000) # a desired delay after writing all boards
+    time.sleep(1000)  # a desired delay after writing all boards
