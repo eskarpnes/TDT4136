@@ -62,8 +62,8 @@ class Board:
                     self.goal = x, y
 
         self.board_array = board
-        print("Read board of size " + str(len(self.board_array)) +
-              "," + str(len(self.board_array[0])))
+        #  print("Read board of size " + str(len(self.board_array)) +
+              #  "," + str(len(self.board_array[0])))
 
     # Saves the board as a image file
     def save_image_board(self):
@@ -88,7 +88,7 @@ def heuristic(goal, curr):
 
 
 #  This astar algorithm is based on the algorithm found at redblobgames.com
-def shortest_path(board_name, prioritize=False):
+def shortest_path(board_name, use_heuristic=False):
     board = Board(board_name)
     start = board.start
     goal = board.goal
@@ -98,12 +98,14 @@ def shortest_path(board_name, prioritize=False):
     cost_so_far = {}
     came_from[start] = None
     cost_so_far[start] = 0
-    considered = []
+    open_nodes = []
+    closed_nodes = []
 
     # While there are more nodes on the frontier
     while not frontier.empty():
         # Gets the node with the highest priority
         current = frontier.get()[1]
+        closed_nodes.append(current)
         # If it has found the goal, it's done!
         if current == goal:
             break
@@ -115,21 +117,28 @@ def shortest_path(board_name, prioritize=False):
             new_cost = cost_so_far[current] + board.cost(friend)
             #  Adds the neighbour to the frontier if it has lower cost than before
             if friend not in cost_so_far or new_cost < cost_so_far[friend]:
-                # Adds the neighbour to the considered nodes (for visualization)
-                considered.append(friend)
+                # Adds the neighbour to the open_nodes nodes (for visualization)
                 cost_so_far[friend] = new_cost
                 # Calculates priority and adds it to queue
                 priority = new_cost  # dijkstra
-                if prioritize:  # a_star
+                if use_heuristic:  # a_star
                     priority = new_cost + heuristic(goal, friend)
                 frontier.put((priority, friend))
+                open_nodes.append(friend)
                 # Sets predecessor
                 came_from[friend] = current
-    find_path(start, goal, came_from, considered, board)
+
+    for node in closed_nodes:
+        if node in open_nodes:
+            open_nodes.remove(node)
+
+    print('finished running algorithm!')
+
+    find_path(start, goal, came_from, open_nodes, closed_nodes, board)
 
 
 def a_star(board_name):
-    shortest_path(board_name, prioritize=True)
+    shortest_path(board_name, use_heuristic=True)
 
 
 # Same as the astar without the heuristic
@@ -145,24 +154,31 @@ def bfs(board_name):
     frontier.put(start)
     came_from = {}
     came_from[start] = None
-    considered = []
+    open_nodes = []
+    closed_nodes = []
 
     while not frontier.empty():
         current = frontier.get()
+        closed_nodes.append(current)
         if current == goal:
             break
 
         neighbors = board.get_neighbors(current)
         for friend in neighbors:
             if friend not in came_from:
-                considered.append(friend)
+                open_nodes.append(friend)
                 frontier.put(friend)
                 came_from[friend] = current
-    find_path(start, goal, came_from, considered, board)
+
+    for node in closed_nodes:
+        if node in open_nodes:
+            open_nodes.remove(node)
+
+    find_path(start, goal, came_from, open_nodes, closed_nodes, board)
 
 
 # The function that finds the path by iterating through predecessors.
-def find_path(start, goal, came_from, considered, board):
+def find_path(start, goal, came_from, open_nodes, closed_nodes, board):
     current = goal
     path = [current]
     # Finds the path by iterating through predecessors to start
@@ -170,25 +186,34 @@ def find_path(start, goal, came_from, considered, board):
         current = came_from[current]
         path.append(current)
     path.reverse()
-    print([p for p in path])
     renderBoard = BoardRender(board.board_array)
-    # Renders every considered node
-    for c in considered:
+    # Renders every closed node
+    print("# closed nodes: ", end=' ')
+    print(len(closed_nodes))
+    for c in closed_nodes:
+        x, y = c
+        renderBoard.closed(y, x)
+    renderBoard.redraw()
+    # Renders every open node
+    print("# open nodes: ", end=' ')
+    print(len(open_nodes))
+    for c in open_nodes:
         x, y = c
         renderBoard.considered(y, x)
-        renderBoard.redraw()
-        time.sleep(0.005)
+    renderBoard.redraw()
     # Renders the path
+    print("# path: ", end=' ')
+    print(len(path))
     for p in path:
         x, y = p
         renderBoard.visited(y, x)
-        renderBoard.redraw()
-        time.sleep(0.02)
+    renderBoard.redraw()
+
+    renderBoard.mainloop()
     time.sleep(1)
 
 
 if __name__ == "__main__":
-    #  boards = "1-1 1-2 1-3 1-4 2-1 2-2 2-3 2-4".split()
     def iterate_path(path, algorithm, board_name=None):
         for board in os.listdir(path):
             board_path = os.path.join(path, board)
@@ -200,10 +225,9 @@ if __name__ == "__main__":
                 if not board_name:
                     algorithm(board_path)
 
-    #  iterate_path('harstad', a_star)
-    iterate_path('boards', a_star, '1-1')
-    iterate_path('boards', dijkstra, '1-1')
-    iterate_path('boards', bfs, '1-1')
+    iterate_path('trondheim', a_star)
+    #  iterate_path('trondheim', dijkstra)
+    #  iterate_path('trondheim', bfs)
     #  iterate_path('boards', a_star)
+    #  iterate_path('boards', dijkstra)
     #  iterate_path('boards', bfs)
-    time.sleep(1000)  # a desired delay after writing all boards

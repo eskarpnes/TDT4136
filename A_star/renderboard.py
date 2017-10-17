@@ -13,10 +13,11 @@ colors = {
     'r': rgb(114, 80, 41),  # Road
     '.': rgb(255, 255, 255),  # Nothing
     '#': rgb(114, 114, 114),  # Wall
-    'A': rgb(90, 180, 90),  # Start
+    'A': rgb(255, 120, 0),  # Start
     'B': rgb(255, 90, 90),  # End
     'v': rgb(255, 0, 0),
-    'c': rgb(150, 150, 150)
+    'c': rgb(100,100,100),
+    'x': rgb(0,0,0)
 }
 
 
@@ -30,7 +31,7 @@ class BoardRender(tk.Tk):
         board_x = len(board_array[0])
         board_y = len(board_array)
         tk.Tk.__init__(self)
-        self.cell_size = 15
+        self.cell_size = 2
         self.canvas = tk.Canvas(
             self,
             width=self.cell_size * board_x,  # board width * square size
@@ -51,18 +52,18 @@ class BoardRender(tk.Tk):
                 self.rect[row, column] = self.canvas.create_rectangle(
                     x1, y1, x2, y2, tags="rect")
                 self.oval[row, column] = self.canvas.create_oval(
-                    x1 + 4, y1 + 4, x2 - 4, y2 - 4, tags="oval")
+                    x1+1, y1+1, x2, y2, tags="oval")
 
-        self.canvas.itemconfig("rect", fill="")
+        self.canvas.itemconfig("rect", fill="", outline="")
         self.canvas.itemconfig("oval", fill="", outline="")
 
         for i in range(board_y):
             for j in range(board_x):
-                self.fill_square(j, i, color=board_array[i][j])
+                self.fill_square(i, j, color=board_array[i][j])
 
     def fill_square(self, x, y, color):
         #  self.canvas.itemconfig("rect", fill=get_color(color))
-        pos = self.rect[y, x]
+        pos = self.rect[x, y]
         self.canvas.itemconfig(pos, fill=get_color(color))
 
     def redraw(self):
@@ -76,3 +77,7 @@ class BoardRender(tk.Tk):
     def considered(self, x, y):
         pos = self.oval[x, y]
         self.canvas.itemconfig(pos, fill=get_color('c'))
+
+    def closed(self, x, y):
+        pos = self.oval[x, y]
+        self.canvas.itemconfig(pos, fill=get_color('x'))
